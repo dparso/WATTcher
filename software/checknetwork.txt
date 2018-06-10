@@ -1,0 +1,19 @@
+#! /bin/bash
+# Check if connected to network
+# by counting instances of "inet" in ifconfig wlan0 command
+# If so, do nothing. If not, switch back to host mode
+
+# only execute if currently in client mode (and clientFlag.txt exists)
+if [ -e /var/www/html/clientFlag.txt ]
+then
+
+	IP="$(/sbin/ifconfig wlan0 | grep 'inet ' | wc -l)"
+
+	if [[ $IP -eq "0" ]]; then
+		echo "Connection is down";
+		bash -c "printf '\nDown' >> /etc/log.txt"
+		/bin/bash /var/www/html/hostmode.sh
+	else
+		bash -c "printf '\nUp' >> /etc/log.txt"
+	fi
+fi

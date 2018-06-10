@@ -1,0 +1,63 @@
+<?php
+
+// Read data from file
+$lines = file('test.txt');
+
+// Store as integers
+$integers = array();
+
+if (count($lines) <= 0) {
+	die("No data in file!\n");
+}
+
+//$servername = "turing.bowdoin.edu";
+$servername = "localhost";
+$username = "energydata";
+$password = "zxZbLKC5fdvNPOpw";
+$dbname = "energydata";
+// Create connection
+$conn = new mysqli($servername, $username, $password, $dbname);
+// Check connection
+if ($conn->connect_error) {
+	die("Connection failed: " . $conn->connect_error . "\n");
+}
+
+$sql = "";
+$values = array();
+
+$valid = true;
+$insertValues = "";
+if(count($lines) > 0) {
+	parse_str($lines[0], $output);
+	$meterID = $output['meter_id'];
+}
+
+for($i = 0; $i < count($lines); $i++) {
+	if(!(strlen($lines[$i]) > 1)) {
+		continue;
+	}
+	// get name and value from data.txt
+	parse_str($lines[$i], $output);
+
+	$value = $output['value'];
+
+	$insertValues .= "INSERT INTO Data (METER_ID, VALUE)\nVALUES ('$meterID', $value);";
+}
+
+$insertNames = "INSERT INTO Labels (METER_ID, LABEL)\nVALUES ('$meterID', '$meterID');";
+
+if($conn->query($insertNames) === TRUE) {
+	echo "Added new meter $meterID to Labels.";
+} else {
+	echo "Meter $meterID already exists.";
+}
+
+if($conn->multi_query($insertValues) === TRUE) {
+	echo "Inserted values.\n";
+} else {
+	echo "Error: " . $insertValues . "<br>" . $conn->error . "\n";
+}
+
+$conn->close();
+
+?>

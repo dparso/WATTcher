@@ -1,0 +1,5 @@
+meter_id=3.2&value=0.0&timestamp=2018-04-26 14:18:57
+meter_id=3.2&value=0.0&timestamp=2018-04-26 14:18:58
+meter_id=3.2&value=0.0&timestamp=2018-04-26 14:18:59
+meter_id=3.2&value=0.0&timestamp=2018-04-26 14:19:00
+meter_id=3.2&value=0.0&timestamp=2018-04-26 14:19:01

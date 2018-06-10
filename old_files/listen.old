@@ -1,0 +1,24 @@
+#! /usr/bin/php
+<?php
+// continuously listen for input on Turing port, store in data.txt
+//$count = 1;
+while (true) {
+	// listen for input
+	exec("nc -l 8089", $output);
+	print_r($output);
+	if (count($output) > 0) {
+			// combine lines into file entry
+			$contents = "";
+			foreach($output as $line) {
+				$contents .= $line  . "\n";
+			}
+			file_put_contents('data.txt', $contents);
+			exec("php sqlconnect.php");
+			echo "Stored entry!\n";
+		//}
+	} else {
+		echo "Empty entry: skipping.\n";
+	}
+	unset($output);
+}	
+?>

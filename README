@@ -1,0 +1,2 @@
+Command to start listening:
+nohup bash -c "php listen.php" &> output.txt &

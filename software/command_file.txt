@@ -1,0 +1,35 @@
+<?php 
+$cmd_num = file('/var/www/html/command_num.txt');
+$latest = $cmd_num[0] or die("Cannot find /var/www/html/command_num.txt or file is empty\n");
+
+// this section was used when we required serial numbers
+//$contents = file('/etc/serial.txt');
+// remove newline
+//$id = trim(preg_replace('/\s+/', ' ', $contents[0])) or die("/etc/serial.txt empty\n");
+
+$contents = file('/etc/id_number.txt');
+preg_match('/(\d+)/', $contents[0], $id) or die("/etc/id_number.txt empty\n");
+
+$command = file('https://turing.bowdoin.edu/~dparsons/software/command.txt');
+$num = count($command) - 5;
+echo "Read " . $num . " commands.\n";
+for($i = 0; $i < count($command); $i++) {
+	if(preg_match('/^(\d+) (\d|\*) (.*)/', $command[$i], $matches)) {
+		// 0 is whole line, 1 is command number, 2 is id, 3 is command
+		if($matches[1] > $latest) {
+			if(!strcmp($id[1], $matches[2]) || !strcmp("*", $matches[2])) {
+				echo "Executing command $matches[1]\n";
+				// replace the current_num with latest executed command
+				file_put_contents('/var/www/html/command_num.txt', "$matches[1]") or die("Could not write to /var/www/html/command_num.txt\n");
+				// note that this happens after the latest command num is executed
+				// this allows a command to change (reset) command_num.txt without
+				// being overwritten this very file_put_contents
+				exec($matches[3]);
+
+				file_put_contents('/var/www/html/log.txt', "$matches[0]" . "\n", FILE_APPEND);
+			}
+		}
+	}
+}
+
+?>

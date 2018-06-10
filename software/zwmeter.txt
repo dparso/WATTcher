@@ -1,0 +1,114 @@
+#!/usr/bin/php
+<?php
+
+$cwd = dirname(__FILE__);
+
+define('ZWAVE_CONF', '/etc/zwave.conf');
+
+$argv = $_SERVER['argv'];
+if (count($argv) != 3) {
+  die("Usage: zwmeter [ttyfile] [interval-msec]\n[interval-msec] must be an integer\n");
+}
+$ttyfile = $argv[1];
+$interval = $argv[2];
+
+$devices = array();
+if (!file_exists(ZWAVE_CONF) || filesize(ZWAVE_CONF) == 0) {
+  echo "WARNING: Z-Wave configuration file doesn't exist or is empty\n";
+} else {
+  echo "Reading Z-Wave devices from " . ZWAVE_CONF . "...\n";
+  foreach (file(ZWAVE_CONF) as $line) {
+    $matches = array();
+    if (preg_match('/^\s*(\d+)\s+(\S+)\s*$/', $line, $matches)) {
+      $zwaveId = (int) $matches[1];
+      $zwaveName = $matches[2];
+      $devices[$zwaveId] = trim($zwaveName);
+    } else {
+      die("Bad config line '$line'\n");
+    }
+  }
+}
+
+declare(ticks = 1);
+pcntl_signal(SIGTERM, 'signal_handler');
+pcntl_signal(SIGINT, 'signal_handler');
+$exit = false;
+function signal_handler($signal) {
+  global $exit;
+  switch ($signal) {
+    case SIGTERM:
+    case SIGKILL:
+    case SIGINT:
+      echo "signal received, shutting down...\n";
+      $exit = true;
+      system('killall -q zwread');
+      return;
+  }
+}
+
+// get ID for MySQL insert
+$contents = file("/etc/id_number.txt");
+preg_match('/(\d+)/', $contents[0], $id) or die("/etc/id_number.txt empty\n");
+$id = $id[0];
+
+$matches = array();
+while (!$exit) {
+  #echo "opening zwread...\n";
+  $handle = popen("python /home/pi/Desktop/python-openzwave/meter-read/zwread.py --device=$ttyfile --interval=$interval", 'r');
+  $starting = true;
+
+  $roundStart = microtime(true);
+  $roundDevices = array();
+
+  while (!$exit && ($line = fgets($handle)) !== false) {
+#    echo $line;
+    if ($starting && strpos($line, 'ERROR: Cannot open serial port') !== false) {
+      # failed, restart zwread
+      echo "WARNING: serial port read failed, retrying...\n";
+      break;
+    } else if (strpos($line, 'zwave_power_report') !== false) {
+      # success, got reading
+      $starting = false;
+      if (preg_match('/zwave_power_report (.*?) Received/', $line, $productName)) {
+		$pName = $productName[1];
+
+      }
+
+      if (preg_match('/ node (\d+).*?Power=([0-9.]+)W$/', $line, $matches)) {
+        $zwaveId = (int) $matches[1];
+        if (isset($devices[$zwaveId])) {
+          $zwaveName = $devices[$zwaveId];
+        } else {
+          echo "WARNING: no device in config file for ID $zwaveId\n";
+          $zwaveName = "[ID $zwaveId]";
+        }
+        $level = $matches[2];
+        echo "* $zwaveName $level\n";
+	// pName is product name, name is ID number, value is meter reading, id is Pi ID
+	$meterID = "${id}.{$zwaveId}";
+	$timeStamp = date('Y-m-d G:i:s');
+	file_put_contents("/home/pi/Desktop/python-openzwave/meter-read/data.txt", "meter_id=$meterID&value=$level&timestamp=$timeStamp\n", FILE_APPEND);
+
+        if (isset($roundDevices[$zwaveName])) {
+          $roundDevices = array();
+          $now = microtime(true);
+          $duration = round(($now - $roundStart) * 1000.0); # convert to ms
+          echo "* zwround $duration\n";
+          $roundStart = $now;
+        }
+        $roundDevices[$zwaveName] = true;
+
+      } else {
+      #  echo "WARNING: failed to match report line '$line'\n";
+      }
+    }
+  }
+
+  system('killall -q zwread');
+  pclose($handle);
+  if (!$exit) {
+    sleep(1);
+  }
+}
+
+?>

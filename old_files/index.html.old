@@ -1,0 +1,13 @@
+<!DOCTYPE HTML> <html>  
+	<body>
+		
+		<h1> Enter WIFI credentials: </h1>
+
+	<!--	<form action="welcome_get.php" method="post"> -->
+		<form action="sqlconnect.php" method="post">
+		WIFI Name:     <input type="text" name="network"><br>
+		WIFI Password: <input type="text" name="password"><br>
+		<input type="submit">
+		</form>
+	</body>
+</html>

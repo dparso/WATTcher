@@ -1,0 +1,25 @@
+<html>
+<body>
+
+<?php
+$arg1 = htmlspecialchars($_POST["network"]);
+$arg2 = htmlspecialchars($_POST["password"]);
+?>
+
+Name: <?php echo $arg1; ?><br>
+Password: <?php echo $arg2; ?>
+
+<?php
+
+$output;
+$return_var;
+
+exec("./php_root -n '" . $arg1 . "' -p '" . $arg2 . "'", $output, $return_var);
+echo "\nNumber of outputs: " . count($output) . "\n";
+foreach( $output as $value ) {
+	echo "value $value <br />";
+}
+
+?>
+</body>
+</html>

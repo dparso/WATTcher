@@ -1,0 +1,68 @@
+<?php
+
+// Read data from file
+$lines = file('data.txt');
+
+// Store as integers
+$integers = array();
+
+if (count($lines) <= 0) {
+	die("No data in file!\n");
+}
+
+//$servername = "turing.bowdoin.edu";
+$servername = "localhost";
+$username = "energydata";
+$password = "zxZbLKC5fdvNPOpw";
+$dbname = "energydata";
+// Create connection
+$conn = new mysqli($servername, $username, $password, $dbname);
+// Check connection
+if ($conn->connect_error) {
+	die("Connection failed: " . $conn->connect_error . "\n");
+}
+
+$sql = "";
+$values = array();
+for($i = 0; $i < count($lines); $i++) {
+	echo "Line $i is $lines[$i]";
+	// get name and value from data.txt
+	parse_str($lines[$i], $output);
+	$name = $output['name'];
+	$value = $output['value'];
+	// add values to 2d array, grouped by name
+	if(array_key_exists($name, $values)) {
+		array_push($values[$name], $value);	
+	} else {
+		$values[$name] = [$value];
+	}
+}
+
+foreach($values as $key => $set) {
+	$insertValues = "";
+	// create command to insert all values
+	foreach($set as $value) {
+		$insertValues .= "INSERT INTO $key (NAME, VALUE)\nVALUES ('$key', $value);";
+	}
+	// ensure table exists by attempting to create it 
+	$createTable = "CREATE TABLE $key LIKE Data ;";
+	if($conn->multi_query($createTable) === TRUE) {
+		// if successful, insert
+		echo "Created new table.\n";
+		if($conn->multi_query($insertValues) === TRUE) {
+			echo "Inserted values.\n";
+		} else {
+			echo "Error: " . $insertValues . "<br>" . $conn->error . "\n";
+		}
+	} else if($conn->multi_query($insertValues) === TRUE) {
+		// if table creation failed, attempt inserting (table might already exist)
+		echo "Inserted values.\n";
+	} else {
+		echo "Error: " . $insertValues . "<br>" . $conn->error . "\n";
+	}
+	sleep(1);
+}
+
+//file_put_contents("data.txt", "");
+
+?>

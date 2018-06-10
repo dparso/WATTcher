@@ -1,0 +1,4 @@
+#! /bin/bash
+# places the contents of a file on Turing into a file at the designated location
+# argument 1 is file name, argument 2 is destination on Pi
+bash -c "curl -L https://turing.bowdoin.edu/~dparsons/software/$1 > $2"

@@ -1,0 +1,43 @@
+<?php
+
+	$file = $argv[1] or die("Invalid argument.\n");
+//	$data = file_get_contents($file) or die("Could not read file.\n");
+
+	$handle = fopen($file, "r") or die("Could not read file.\n");
+
+	$host="turing.bowdoin.edu";
+	$port=8089;
+	$timeout = 30;
+
+	$socket = socket_create(AF_INET, SOCK_STREAM, SOL_TCP);
+	if ($socket === false) {
+		echo "socket_create() failed: reason: " . socket_strerror(socket_last_error($socket)) . "\n";
+		exit();
+	}
+
+	$result = socket_connect($socket, $host, $port);
+	if ($result === false) {
+		echo "socket_connect() failed: reason: ($result) " . socket_strerror(socket_last_error($socket)) . "\n";
+		exit();
+	}
+
+	$connected = false;	
+	while(($data = fgets($handle)) !== false) {
+		echo "writing " . $data . "\n";
+		if(socket_write($socket, $data, strlen($data)) === false) {
+			echo "socket_write() failed: reason: " . socket_strerror(socket_last_error($socket)) . "\n";
+			exit();
+		} else {
+			$connected = true;
+		}
+	}
+	socket_write($socket, "done", 4);
+
+	fclose($handle);
+	// only wipe the file if the connection was successful
+	if($connected) {
+		file_put_contents($file, '');
+	}
+	socket_close($socket);
+
+?>

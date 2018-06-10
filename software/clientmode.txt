@@ -1,0 +1,15 @@
+#! /bin/bash
+# Switch from AP mode to client mode
+
+# write to wpa_supplicant.conf if arguments present
+if [[ ! -z $1 && ! -z $2 ]]
+then
+	bash -c "printf '\nnetwork={\n\tssid=\"$1\"\n\tpsk=\"$2\"\n\tkey_mgmt=WPA-PSK\n}\n' >> /etc/wpa_supplicant/wpa_supplicant.conf"
+fi
+
+# file acts as flag for checknetwork.sh (only runs if present)
+bash -c "sudo touch /var/www/html/clientFlag.txt"
+
+bash -c "cp /etc/rc.local.client /etc/rc.local"
+bash -c "printf 'clientmode rebooting' >> /var/www/html/log.txt"
+bash -c "reboot"

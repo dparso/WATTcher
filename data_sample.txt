@@ -1,0 +1,11 @@
+pName=HKZW-SO01 Smart Plug&meter_id=1.2&value=0.0
+pName=HKZW-SO01 Smart Plug&meter_id=1.2&value=0.0
+pName=HKZW-SO01 Smart Plug&meter_id=1.2&value=0.0
+pName=HKZW-SO01 Smart Plug&meter_id=1.2&value=0.0
+pName=HKZW-SO01 Smart Plug&meter_id=1.2&value=2.30900001526
+pName=HKZW-SO01 Smart Plug&meter_id=1.2&value=2.30900001526
+pName=HKZW-SO01 Smart Plug&meter_id=1.2&value=2.30900001526
+pName=HKZW-SO01 Smart Plug&meter_id=1.2&value=11.4739999771
+pName=HKZW-SO01 Smart Plug&meter_id=1.2&value=11.4739999771
+pName=HKZW-SO01 Smart Plug&meter_id=1.2&value=35.4539985657
+pName=HKZW-SO01 Smart Plug&meter_id=1.2&value=50.3040008545

@@ -1,0 +1,9 @@
+// remember to use absolute paths in all cases (not even ~, as the jobs will run as root and not access the same home directory)
+// format: commandNum targetID fullCommand
+// targetID = * for all targets
+// example: 1 4 /bin/bash /var/www/html/copy_file.sh clientmode.txt /var/www/html/clientmode.sh
+// command numbers *must* be increasing -- start with 1
+1 * /bin/bash /var/www/html/copy_file.sh command_file.txt /var/www/html/command.php
+2 * /bin/bash /var/www/html/copy_file.sh zwmeter.txt /home/pi/Desktop/python-openzwave/meter-read/zwmeter
+5 5 /bin/bash /var/www/html/hostmode.sh
+
