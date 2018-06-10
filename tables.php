@@ -51,7 +51,7 @@ $devicesActive = array();
 
 for($i = 0; $i < count($deviceNames); $i++) {
 	$labelQuery = "SELECT DISTINCT LABEL FROM Labels WHERE METER_ID = \"$deviceNames[$i]\"";
-	$activeQuery = "SELECT DISTINCT ID FROM Data WHERE METER_ID = \"$deviceNames[$i]\" AND TIMESTAMP >= DATE_SUB(NOW(), INTERVAL 2 MINUTE);";
+	$activeQuery = "SELECT DISTINCT ID FROM Data WHERE METER_ID = \"$deviceNames[$i]\" AND TIMESTAMP >= DATE_SUB(NOW(), INTERVAL 5 MINUTE);";
 
 	$labelResult = $conn->query($labelQuery);
 	$activeResult = $conn->query($activeQuery);

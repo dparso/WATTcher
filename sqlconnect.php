@@ -72,6 +72,6 @@ $conn->close();
 $time_end = microtime_float();
 $time = $time_end - $time_start;
 
-file_put_contents("timing.txt", $time . "\n", FILE_APPEND);
+//file_put_contents("timing.txt", $time . "\n", FILE_APPEND);
 
 ?>
